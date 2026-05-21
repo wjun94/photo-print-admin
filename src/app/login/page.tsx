@@ -1,67 +1,79 @@
-import { Form, Input, Button, Card, Typography, message } from 'antd'
+import { Form, Input, Button, message } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useRequest } from 'ahooks'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
-import request from '@/core/lib/axios'
 
-const { Title } = Typography
-const APP_TITLE = import.meta.env.VITE_APP_TITLE
-
-// ✅ 定义登录表单类型
-interface LoginFormValues {
-  username: string
-  password: string
-}
-
-// ✅ 定义登录响应类型
-interface LoginResponse {
-  token: string
-  user: {
-    id: number
-    username: string
-    roles: string[]
-    permissions: string[]
-  }
-}
+// 引入接口
+import { loginApi, LoginParams } from '@/api'
 
 export default function Login() {
-  const [form] = Form.useForm<LoginFormValues>()
+  const [form] = Form.useForm<LoginParams>()
   const navigate = useNavigate()
   const { setToken, setUserInfo } = useAuthStore()
-
-  const { loading, run: login } = useRequest(
-    // ✅ 明确 values 类型
-    async (values: LoginFormValues): Promise<LoginResponse> => {
-      return request.post('/auth/login', values)
-    },
+  console.log(import.meta.env.VITE_API_BASE_URL)
+  // 使用接口
+  const { loading, run: handleLogin } = useRequest(
+    (params: LoginParams) => loginApi(params),
     {
       manual: true,
-      onSuccess: (res: LoginResponse) => {
-        setToken(res.token)
-        setUserInfo(res.user)
+      onSuccess: (res) => {
+        console.log(res)
+        setToken(res.data.token)
+        // setUserInfo(res.user)
         message.success('登录成功')
         navigate('/dashboard')
+      },
+      onError: () => {
+        message.error('账号或密码错误')
       }
     }
   )
 
   return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
-      <Card style={{ width: 400 }}>
-        <Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>{APP_TITLE}</Title>
-        <Form form={form} onFinish={login} layout="vertical">
-          <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入用户名' }]}>
-            <Input prefix={<UserOutlined />} placeholder="admin" />
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#f0f2f5'
+    }}>
+      <div style={{ width: 400, padding: 32, background: '#fff', borderRadius: 8 }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 24 }}>商城后台管理系统</h2>
+
+        <Form
+          form={form}
+          onFinish={handleLogin}
+          layout="vertical"
+        >
+          <Form.Item<LoginParams>
+            name="username"
+            label="用户名"
+            rules={[{ required: true, message: '请输入用户名' }]}
+          >
+            <Input prefix={<UserOutlined />} placeholder="请输入用户名" />
           </Form.Item>
-          <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="123456" />
+
+          <Form.Item<LoginParams>
+            name="password"
+            label="密码"
+            rules={[{ required: true, message: '请输入密码' }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" />
           </Form.Item>
+
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>登录</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              block
+            >
+              登录
+            </Button>
           </Form.Item>
         </Form>
-      </Card>
+      </div>
     </div>
   )
 }

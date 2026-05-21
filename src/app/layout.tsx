@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { UserOutlined } from '@ant-design/icons'
 import { useAuthStore } from '@/stores/authStore'
 import {
-  DashboardOutlined, ShoppingOutlined, LogoutOutlined
+  DashboardOutlined, ShoppingOutlined, LogoutOutlined, OrderedListOutlined
 } from '@ant-design/icons'
 
 const { Header, Sider, Content } = Layout
@@ -16,6 +16,11 @@ export default function AppLayout() {
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: '首页' },
     { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
+    {
+      key: '/orders', // 新增订单菜单
+      icon: <OrderedListOutlined />,
+      label: '订单管理'
+    }
   ]
 
   const userMenu = [

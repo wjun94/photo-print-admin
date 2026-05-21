@@ -5,6 +5,7 @@ import AppLayout from '@/app/layout'
 import Login from '@/app/login/page'
 import Dashboard from '@/app/dashboard/page'
 import Products from '@/app/products/page'
+import Orders from '@/app/products/page'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: '/', element: <Navigate to="/dashboard" replace /> },
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/products', element: <Products /> },
+      { path: '/orders', element: <Orders /> },
     ]
   },
   // ✅ 添加404页面（捕获所有未匹配的路由）
