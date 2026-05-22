@@ -1,7 +1,13 @@
-// src/core/lib/axios.ts
 import axios from 'axios'
 import { message } from 'antd'
 import { useAuthStore } from '@/stores/authStore'
+
+export interface PageList<T> {
+  list: T
+  page: number,
+  size: number,
+  total: number
+}
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -17,20 +23,20 @@ request.interceptors.request.use((config) => {
   return config
 })
 
-// 响应拦截器 → 这里必须返回 res.data
+// 响应拦截器：只返回 data
 request.interceptors.response.use(
-  (res) => {
-    // ✅ 直接返回 data，接口才能拿到正确类型
-    return res.data
-  },
+  (res) => res.data, // ✅ 必须返回 res.data
   (err) => {
+    console.error('请求异常', err)
+
     if (err.response?.status === 401) {
       useAuthStore.getState().logout()
-      window.location.href = '/login'
       message.error('登录已过期')
+      window.location.href = '/login'
     } else {
       message.error(err.message || '请求失败')
     }
+
     return Promise.reject(err)
   }
 )

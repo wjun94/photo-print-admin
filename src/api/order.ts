@@ -1,5 +1,6 @@
 // src/api/order.ts
-import request from '@/core/lib/axios'
+import request, { PageList } from '@/core/lib/axios'
+import { PageParams, ApiResponse } from '@/core/components/ProTable'
 
 // 订单项类型
 export interface OrderItem {
@@ -25,7 +26,12 @@ export interface Order {
   items: OrderItem[]
 }
 
-// 获取订单列表接口
-export function getOrderListApi() {
-  return request.get<{ list: Order[] }>('/orders')
+// 订单列表请求参数
+export interface OrderListParams extends PageParams {
+  status?: string
+}
+
+// 获取订单列表接口（完全匹配你的后端接口）
+export function getOrderListApi(params: OrderListParams) {
+  return request.get<ApiResponse<PageList<Order[]>>>('/admin/orders', { params })
 }

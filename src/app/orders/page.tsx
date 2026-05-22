@@ -1,18 +1,11 @@
 // src/app/orders/page.tsx
-import { Table, Card, Tag, Button, Space, message } from 'antd'
-import { EyeOutlined, SearchOutlined } from '@ant-design/icons'
-import { useRequest } from 'ahooks'
+import { useRef } from 'react'
+import { Tag, Button, Space, message } from 'antd'
+import { EyeOutlined } from '@ant-design/icons'
+import ProTable, { ProTableRef } from '@/core/components/ProTable'
 import { getOrderListApi, Order } from '@/api/order'
-import type { ColumnsType } from 'antd/es/table'
 
 export default function Orders() {
-    // 获取订单列表
-    const { data, loading, run } = useRequest(getOrderListApi, {
-        onError: () => {
-            message.error('获取订单列表失败')
-        }
-    })
-
     // 订单状态映射
     const statusMap: Record<string, { text: string; color: string }> = {
         pending: { text: '待付款', color: 'orange' },
@@ -22,8 +15,35 @@ export default function Orders() {
         cancelled: { text: '已取消', color: 'red' }
     }
 
+    // ✅ 搜索字段配置（只需要写这个，表单自动生成）
+    const searchFields = [
+        {
+            name: 'orderNo',
+            label: '订单号',
+            type: 'input',
+            placeholder: '请输入订单号'
+        },
+        {
+            name: 'status',
+            label: '订单状态',
+            type: 'select',
+            options: [
+                { value: 'pending', label: '待付款' },
+                { value: 'paid', label: '已付款' },
+                { value: 'shipped', label: '已发货' },
+                { value: 'completed', label: '已完成' },
+                { value: 'cancelled', label: '已取消' }
+            ]
+        },
+        {
+            name: 'createdAt',
+            label: '创建时间',
+            type: 'dateRange'
+        }
+    ]
+
     // 表格列定义
-    const columns: ColumnsType<Order> = [
+    const columns = [
         {
             title: '订单号',
             dataIndex: 'orderNo',
@@ -55,7 +75,7 @@ export default function Orders() {
         {
             title: '商品数量',
             key: 'items',
-            render: (_, record) => record.items.length
+            render: (_: unknown, record: Order) => record.items.length
         },
         {
             title: '创建时间',
@@ -64,22 +84,16 @@ export default function Orders() {
             width: 180
         },
         {
-            title: '更新时间',
-            dataIndex: 'updatedAt',
-            key: 'updatedAt',
-            width: 180
-        },
-        {
             title: '操作',
             key: 'action',
             fixed: 'right',
             width: 100,
-            render: (_, record) => (
+            render: (_: unknown, record: Order) => (
                 <Space>
                     <Button
                         type="link"
                         icon={<EyeOutlined />}
-                        onClick={() => handleViewDetail(record)}
+                        onClick={() => message.info(`查看订单：${record.orderNo}`)}
                     >
                         详情
                     </Button>
@@ -88,36 +102,17 @@ export default function Orders() {
         }
     ]
 
-    // 查看订单详情
-    const handleViewDetail = (order: Order) => {
-        message.info(`查看订单：${order.orderNo}`)
-        // 这里可以打开订单详情弹窗
-    }
+    const tableRef = useRef<ProTableRef>(null)
 
     return (
-        <Card title="订单管理">
-            <div style={{ marginBottom: 16 }}>
-                <Button
-                    type="primary"
-                    icon={<SearchOutlined />}
-                    onClick={() => run()}
-                >
-                    刷新
-                </Button>
-            </div>
-
-            <Table
-                rowKey="id"
-                columns={columns}
-                dataSource={data?.data?.list || []}
-                loading={loading}
-                scroll={{ x: 1200 }}
-                pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showTotal: (total) => `共 ${total} 条订单`
-                }}
-            />
-        </Card>
+        <ProTable<Order>
+            ref={tableRef}
+            columns={columns}
+            request={getOrderListApi}
+            rowKey="id"
+            title="订单列表"
+            scroll={{ x: 1200 }}
+            searchFields={searchFields} // ✅ 传入搜索配置
+        />
     )
 }
