@@ -1,0 +1,6 @@
+/* ✅ Tailwind v4 自定义颜色（必须写在这里） */
+@theme {
+  --color-primary: #1677ff; /* 和 Ant Design 主色完全一致 */
+  --color-primary-hover: #4096ff;
+  --color-primary-active: #0d53b0;
+}

@@ -1,9 +1,12 @@
-import { Layout, Menu, Avatar, Dropdown, Button } from 'antd'
+import { Layout, Menu, Avatar, Dropdown } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { UserOutlined } from '@ant-design/icons'
 import { useAuthStore } from '@/stores/authStore'
 import {
-  DashboardOutlined, ShoppingOutlined, LogoutOutlined, OrderedListOutlined
+  DashboardOutlined,
+  ShoppingOutlined,
+  LogoutOutlined,
+  OrderedListOutlined
 } from '@ant-design/icons'
 
 const { Header, Sider, Content } = Layout
@@ -16,11 +19,7 @@ export default function AppLayout() {
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: '首页' },
     { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
-    {
-      key: '/orders', // 新增订单菜单
-      icon: <OrderedListOutlined />,
-      label: '订单管理'
-    }
+    { key: '/orders', icon: <OrderedListOutlined />, label: '订单管理' }
   ]
 
   const userMenu = [
@@ -28,26 +27,38 @@ export default function AppLayout() {
   ]
 
   return (
-    <Layout style={{ height: '100vh' }}>
-      <Sider theme="light">
-        <div style={{ height: 48, background: '#1677ff', margin: 16, borderRadius: 4, color: 'white' }}>后台管理系统</div>
+    <Layout className="h-screen">
+      {/* 左侧侧边栏 */}
+      <Sider theme="light" width={200} className="shadow-md">
+        {/* Logo 区域 */}
+        <div className="h-12 bg-primary m-4 rounded flex items-center justify-center text-white font-semibold">
+          后台管理系统
+        </div>
+
+        {/* 菜单 */}
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
+          className="border-r-0"
         />
       </Sider>
+
+      {/* 右侧主内容区 */}
       <Layout>
-        <Header style={{ padding: '0 16px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Dropdown menu={{ items: userMenu }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* 顶部导航栏 */}
+        <Header className="px-4 flex justify-end items-center bg-white shadow-sm">
+          <Dropdown menu={{ items: userMenu }} placement="bottomRight">
+            <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
               <Avatar size="small" icon={<UserOutlined />} />
               <span>{userInfo?.username || '管理员'}</span>
             </div>
           </Dropdown>
         </Header>
-        <Content style={{ margin: '16px', padding: 16, background: '#fff' }}>
+
+        {/* 页面内容 */}
+        <Content className="m-4 p-4 bg-white rounded-lg shadow-sm">
           <Outlet />
         </Content>
       </Layout>
