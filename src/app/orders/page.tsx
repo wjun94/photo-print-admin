@@ -6,7 +6,6 @@ import { getOrderListApi, Order } from '@/api/order'
 import type { ColumnsType } from 'antd/es/table'
 
 export default function Orders() {
-    console.log(111)
     // 获取订单列表
     const { data, loading, run } = useRequest(getOrderListApi, {
         onError: () => {
@@ -110,7 +109,7 @@ export default function Orders() {
             <Table
                 rowKey="id"
                 columns={columns}
-                dataSource={data?.data || []}
+                dataSource={data?.data?.list || []}
                 loading={loading}
                 scroll={{ x: 1200 }}
                 pagination={{

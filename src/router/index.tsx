@@ -5,7 +5,7 @@ import AppLayout from '@/app/layout'
 import Login from '@/app/login/page'
 import Dashboard from '@/app/dashboard/page'
 import Products from '@/app/products/page'
-import Orders from '@/app/products/page'
+import Orders from '@/app/orders/page'
 
 const router = createBrowserRouter([
   {

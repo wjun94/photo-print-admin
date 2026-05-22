@@ -30,7 +30,7 @@ export default function AppLayout() {
   return (
     <Layout style={{ height: '100vh' }}>
       <Sider theme="light">
-        <div style={{ height: 48, background: '#1677ff', margin: 16, borderRadius: 4 }} />
+        <div style={{ height: 48, background: '#1677ff', margin: 16, borderRadius: 4, color: 'white' }}>后台管理系统</div>
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}

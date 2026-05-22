@@ -25,14 +25,7 @@ export interface Order {
   items: OrderItem[]
 }
 
-// 订单列表响应类型
-export interface OrderListResponse {
-  code: number
-  data: Order[]
-  message: string
-}
-
 // 获取订单列表接口
 export function getOrderListApi() {
-  return request.get<OrderListResponse>('/orders')
+  return request.get<{ list: Order[] }>('/orders')
 }

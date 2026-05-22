@@ -1,13 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-// ✅ 定义用户信息类型
-interface UserInfo {
-  id: number
-  username: string
-  roles: string[]
-  permissions: string[]
-}
+import { getUserInfoApi, UserInfo } from '@/api/auth'
 
 interface AuthState {
   token: string | null
@@ -16,9 +9,10 @@ interface AuthState {
   roles: string[]
 
   setToken: (token: string) => void
-  setUserInfo: (info: UserInfo) => void
+  setUserInfo: (user: UserInfo) => void
   logout: () => void
   hasPermission: (perm: string) => boolean
+  fetchUserInfo: () => Promise<UserInfo | null>
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,23 +23,40 @@ export const useAuthStore = create<AuthState>()(
       permissions: [],
       roles: [],
 
+      // 设置token
       setToken: (token: string) => set({ token }),
-      setUserInfo: (info: UserInfo) => set({
-        userInfo: info,
-        permissions: info.permissions || [],
-        roles: info.roles || []
+
+      // 设置用户信息 & 权限
+      setUserInfo: (user: UserInfo) => set({
+        userInfo: user,
+        roles: user.roles || [],
+        permissions: user.permissions || [],
       }),
-      
+
+      // 退出登录
       logout: () => set({
         token: null,
         userInfo: null,
+        roles: [],
         permissions: [],
-        roles: []
       }),
 
+      // 判断是否有权限
       hasPermission: (perm: string) => {
         return get().permissions.includes(perm)
-      }
+      },
+
+      // ✅ 进入页面调用：获取用户信息 + 权限
+      fetchUserInfo: async () => {
+        try {
+          const userInfo = await getUserInfoApi()
+          get().setUserInfo(userInfo.data)
+          return userInfo.data
+        } catch (err) {
+          get().logout() // token 失效自动登出
+          return null
+        }
+      },
     }),
     { name: 'auth-storage' }
   )
