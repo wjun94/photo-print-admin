@@ -50,7 +50,7 @@ export default function AppLayout() {
         {/* 顶部导航栏 */}
         <Header className="px-4 flex justify-end items-center bg-white shadow-sm">
           <Dropdown menu={{ items: userMenu }} placement="bottomRight">
-            <div className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+            <div className="flex items-center gap-2 cursor-pointer hover:text-primary text-white transition-colors">
               <Avatar size="small" icon={<UserOutlined />} />
               <span>{userInfo?.username || '管理员'}</span>
             </div>

@@ -5,13 +5,13 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
+  /* theme: {
     extend: {
       colors: {
         primary: '#1677ff', // 和 Ant Design 主色完全一致
       },
     },
-  },
+  }, */
   corePlugins: {
     preflight: false, // 保留这个，解决 Ant Design 冲突
   }
