@@ -27,14 +27,13 @@ request.interceptors.request.use((config) => {
 request.interceptors.response.use(
   (res) => res.data, // ✅ 必须返回 res.data
   (err) => {
-    console.error('请求异常', err)
 
     if (err.response?.status === 401) {
       useAuthStore.getState().logout()
       message.error('登录已过期')
       window.location.href = '/login'
     } else {
-      message.error(err.message || '请求失败')
+      message.error(err?.response?.data?.message || err.message || '请求失败')
     }
 
     return Promise.reject(err)

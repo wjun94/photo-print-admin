@@ -6,6 +6,7 @@ import Login from '@/app/login/page'
 import Dashboard from '@/app/dashboard/page'
 import Products from '@/app/products/page'
 import Orders from '@/app/orders/page'
+import WxUsers from '@/app/wx-user/page'
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/products', element: <Products /> },
       { path: '/orders', element: <Orders /> },
+      {
+        path: '/wx-users',
+        element: <WxUsers />
+      }
     ]
   },
   // ✅ 添加404页面（捕获所有未匹配的路由）

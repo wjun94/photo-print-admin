@@ -46,18 +46,24 @@ export const useAuthStore = create<AuthState>()(
         return get().permissions.includes(perm)
       },
 
-      // ✅ 进入页面调用：获取用户信息 + 权限
+      // 获取用户信息 + 权限
       fetchUserInfo: async () => {
         try {
           const userInfo = await getUserInfoApi()
           get().setUserInfo(userInfo.data)
           return userInfo.data
         } catch (err) {
-          get().logout() // token 失效自动登出
+          get().logout()
           return null
         }
       },
     }),
-    { name: 'auth-storage' }
+    {
+      name: 'auth-storage',
+      // ✅ 关键：只持久化 token，其他都不存！
+      partialize: (state) => ({
+        token: state.token
+      })
+    }
   )
 )

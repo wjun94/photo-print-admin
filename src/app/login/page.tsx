@@ -10,23 +10,18 @@ import { loginApi, LoginParams } from '@/api'
 export default function Login() {
   const [form] = Form.useForm<LoginParams>()
   const navigate = useNavigate()
-  const { setToken, setUserInfo } = useAuthStore()
-  console.log(import.meta.env.VITE_API_BASE_URL)
+  const { setToken } = useAuthStore()
   // 使用接口
   const { loading, run: handleLogin } = useRequest(
     (params: LoginParams) => loginApi(params),
     {
       manual: true,
       onSuccess: (res) => {
-        console.log(res)
         setToken(res.data.token)
         // setUserInfo(res.user)
         message.success('登录成功')
         navigate('/dashboard')
       },
-      onError: () => {
-        message.error('账号或密码错误')
-      }
     }
   )
 
