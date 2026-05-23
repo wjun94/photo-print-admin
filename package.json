@@ -16,6 +16,8 @@
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-react": "^1.0.6",
     "ahooks": "^3.9.7",
     "antd": "^6.4.3",
     "autoprefixer": "^10.5.0",

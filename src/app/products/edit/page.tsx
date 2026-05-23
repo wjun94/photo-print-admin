@@ -6,14 +6,14 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useRequest } from 'ahooks'
-import { UploadImage, Image } from '@/components'
+import { UploadImage, Image, RichTextEditor } from '@/components'
 import {
   createProductApi, getProductDetailApi,
   updateProductApi, Product, ProductSpec
 } from '@/api/product'
 
 export default function ProductFormPage() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [form] = Form.useForm()
   const [specForm] = Form.useForm()
@@ -24,28 +24,24 @@ export default function ProductFormPage() {
 
   const isEdit = !!id
 
-  // ✅ 使用 useRequest 自动处理请求（只发1次）
+  // 加载商品详情
   const { loading: detailLoading } = useRequest(
     () => getProductDetailApi(id!),
     {
-      // 只有编辑模式才执行
       ready: isEdit,
-      // 自动取消上一次请求
       refreshDeps: [id],
-      // 请求成功回调
       onSuccess: (res) => {
         const data: any = res.data
         form.setFieldsValue(data)
         setSpecs(data.specs || [])
       },
-      // 请求失败回调
       onError: () => {
         message.error('加载商品详情失败')
       }
     }
   )
 
-  // ✅ 提交商品也使用 useRequest
+  // 提交商品
   const { run: submitProduct, loading: submitLoading } = useRequest(
     async (values: any) => {
       const data: Product = {
@@ -110,7 +106,7 @@ export default function ProductFormPage() {
   // 提交表单
   const onSubmit = (values: any) => {
     if (specs.length === 0) {
-      message.error("请添加规格")
+      message.error("请至少添加一个商品规格")
       return
     }
     submitProduct(values)
@@ -130,7 +126,6 @@ export default function ProductFormPage() {
             onFinish={onSubmit}
             initialValues={{ status: 'draft', sortOrder: 0 }}
             className="space-y-6"
-            // ✅ 加载详情时禁用表单
             disabled={detailLoading}
           >
             {/* 商品名称 */}
@@ -183,16 +178,15 @@ export default function ProductFormPage() {
               />
             </Form.Item>
 
-            {/* 商品详情 */}
+            {/* ✅ 商品详情（富文本编辑器） */}
             <Form.Item
               label="商品详情"
               name="detail"
               labelCol={{ className: 'font-medium text-gray-700' }}
             >
-              <Input.TextArea
-                rows={6}
-                placeholder="请输入商品详细介绍，支持换行"
-                className="rounded-md resize-none"
+              <RichTextEditor
+                placeholder="请输入商品详细介绍，支持图文混排"
+                height={450}
               />
             </Form.Item>
 
