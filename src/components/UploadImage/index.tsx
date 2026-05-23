@@ -2,7 +2,7 @@ import { Upload, message } from 'antd'
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { UploadProps, UploadFile } from 'antd'
 import { useAuthStore } from '@/stores/authStore'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, memo } from 'react'
 
 interface Props {
   value?: string[] | string
@@ -12,13 +12,14 @@ interface Props {
   disabled?: boolean
 }
 
-export default function UploadImage({
+// ✅ 使用 memo 优化，只有 props 变化时才重新渲染
+const UploadImage = memo(({
   value,
   onChange,
   maxCount = 9,
   type = 'single',
   disabled,
-}: Props) {
+}: Props) => {
   const token = useAuthStore((state) => state.token)
   const STATIC_DOMAIN = import.meta.env.VITE_STATIC_BASE_URL
   const API_BASE = import.meta.env.VITE_API_BASE_URL
@@ -26,7 +27,7 @@ export default function UploadImage({
   // 批量上传文件收集器
   const batchFilesRef = useRef<File[]>([])
   // 批量上传定时器
-  const batchTimerRef = useRef<any | null>(null)
+  const batchTimerRef = useRef<NodeJS.Timeout | null>(null)
   // 删除加载状态
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null)
   // 保存最新的value引用（解决闭包问题）
@@ -141,7 +142,7 @@ export default function UploadImage({
     }
   }
 
-  // ✅ 修复：删除最后一张图残留问题
+  // 删除图片
   const handleRemove = async (file: UploadFile) => {
     const rawUrl = file.url?.replace(`${STATIC_DOMAIN}/`, '') || ''
     
@@ -154,24 +155,31 @@ export default function UploadImage({
       // 使用最新的value引用过滤
       const currentUrls = Array.isArray(valueRef.current) ? valueRef.current : []
       const newUrls = currentUrls.filter(item => item !== rawUrl)
-      // ✅ 关键：即使是空数组也明确传递，强制Antd更新
+      // 明确传递空数组，强制状态同步
       onChange?.(newUrls)
     }
     
     message.success('删除成功')
   }
 
+  // ✅ 修复：使用稳定的 uid，避免每次渲染都变化
+  const getStableUid = (url: string, index: number) => {
+    // 使用 url 本身作为 uid（因为 url 是唯一的）
+    // 如果 url 为空，使用 index + 固定前缀
+    return url || `img-${index}-stable`
+  }
+
   // 渲染预览列表
   const fileList = Array.isArray(value)
     ? value.map((url, index) => ({
-        uid: `img-${index}-${Date.now()}`, // ✅ 修复：使用唯一uid，避免索引冲突
+        uid: getStableUid(url, index), // ✅ 稳定的 uid
         url: getFullUrl(url),
         status: 'done' as const,
         closeIcon: deletingUrl === url ? <DeleteOutlined spin /> : <DeleteOutlined />
       }))
     : value
     ? [{
-        uid: 'img-single',
+        uid: getStableUid(value, 0), // ✅ 稳定的 uid
         url: getFullUrl(value),
         status: 'done' as const,
         closeIcon: deletingUrl === value ? <DeleteOutlined spin /> : <DeleteOutlined />
@@ -180,8 +188,7 @@ export default function UploadImage({
 
   return (
     <Upload
-      // ✅ 关键：使用fileList长度作为key，强制重新渲染
-      key={`upload-${fileList.length}`}
+      // ✅ 移除会导致整个组件重新渲染的 key
       fileList={fileList as any}
       beforeUpload={beforeUpload}
       onRemove={handleRemove}
@@ -203,4 +210,9 @@ export default function UploadImage({
       )}
     </Upload>
   )
-}
+})
+
+// 添加显示名称，方便调试
+UploadImage.displayName = 'UploadImage'
+
+export default UploadImage
