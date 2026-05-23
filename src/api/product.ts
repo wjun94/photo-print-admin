@@ -7,21 +7,21 @@ export interface ProductSpec {
   image: string
   name: string
   price: number
-  sku_code: string
-  sort_order: number
+  skuCode: string
+  sortOrder: number
   stock: number
 }
 
 // 商品
 export interface Product {
-  id?: number
+  id?: string
   name: string
   coverImage: string         // 单张
   bannerImages: string[]    // 轮播多张
   description?: string
   detail?: string
   status: 'draft' | 'on_sale' | 'off_sale'
-  sort_order: number
+  sortOrder: number
   specs: ProductSpec[]
   createdAt?: string
   updatedAt?: string
@@ -39,7 +39,7 @@ export function getProductListApi(params: ProductListParams) {
 }
 
 // 详情
-export function getProductDetailApi(id: number) {
+export function getProductDetailApi(id: string) {
   return request.get<ApiResponse<Product>>(`/admin/products/${id}`)
 }
 
@@ -49,11 +49,11 @@ export function createProductApi(data: Product) {
 }
 
 // 编辑
-export function updateProductApi(id: number, data: Product) {
+export function updateProductApi(id: string, data: Product) {
   return request.put(`/admin/products/${id}`, data)
 }
 
 // 删除
-export function deleteProductApi(id: number) {
+export function deleteProductApi(id: string) {
   return request.delete(`/admin/products/${id}`)
 }

@@ -1,6 +1,6 @@
 // src/components/ProTable.tsx
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { Table, Card, Button, Space, Form, Input, Select, DatePicker, message } from 'antd'
+import { Table, Card, Button, Space, Form, Input, Select, DatePicker, message, TableProps } from 'antd'
 import { ReloadOutlined, SearchOutlined, UndoOutlined } from '@ant-design/icons'
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
 import dayjs from 'dayjs' // ✅ 导入 dayjs
@@ -37,7 +37,7 @@ export interface ProTableRef {
   handleRefresh: () => void
 }
 
-interface ProTableProps<T> {
+interface ProTableProps<T = any> extends Omit<TableProps<T>, 'dataSource' | 'pagination' | 'title'> {
   columns: ColumnsType<T> | any
   request: (params: PageParams) => Promise<ApiResponse<T[]> | any>
   rowKey: string
@@ -59,7 +59,8 @@ function ProTableInner<T extends object>(
     scroll,
     initialParams = {},
     searchFields = [],
-    showSearch = true
+    showSearch = true,
+    ...props
   }: ProTableProps<T>,
   ref: React.Ref<ProTableRef>
 ) {
@@ -251,6 +252,11 @@ function ProTableInner<T extends object>(
           scroll={scroll}
           pagination={pagination}
           onChange={handleTableChange}
+          className="bg-white rounded-lg shadow-sm"
+          bordered={false}
+          rowClassName="hover:bg-gray-50 transition-colors"
+          size="middle"
+          {...props}
         />
       </Card>
     </div>

@@ -24,7 +24,6 @@ const router = createBrowserRouter([
       { path: '/products', element: <Products /> },
       { path: '/products/create', element: <ProductsEdit /> },
       { path: '/products/edit/:id', element: <ProductsEdit /> },
-      { path: '/products/:id', element: <ProductsEdit /> },
       { path: '/orders', element: <Orders /> },
       {
         path: '/wx-users',

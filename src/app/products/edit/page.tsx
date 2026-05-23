@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
-  Form, Input, Select, Button, Space, InputNumber,
-  Card, List, message, Divider, Modal, Empty, Popconfirm
+  Form, Input, Select, Button, InputNumber,
+  Card, List, message, Modal, Empty, Popconfirm
 } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
-import { UploadImage } from '@/components'
+import { useRequest } from 'ahooks'
+import { UploadImage, Image } from '@/components'
 import {
   createProductApi, getProductDetailApi,
   updateProductApi, Product, ProductSpec
@@ -16,25 +17,59 @@ export default function ProductFormPage() {
   const navigate = useNavigate()
   const [form] = Form.useForm()
   const [specForm] = Form.useForm()
-  const [loading, setLoading] = useState(false)
   const [specs, setSpecs] = useState<ProductSpec[]>([])
 
   const [specVisible, setSpecVisible] = useState(false)
   const [editSpecIndex, setEditSpecIndex] = useState<number | null>(null)
 
   const isEdit = !!id
-  const STATIC_DOMAIN = import.meta.env.VITE_STATIC_BASE_URL
 
-  // 加载详情
-  useEffect(() => {
-    if (isEdit) {
-      getProductDetailApi(+id).then(res => {
+  // ✅ 使用 useRequest 自动处理请求（只发1次）
+  const { loading: detailLoading } = useRequest(
+    () => getProductDetailApi(id!),
+    {
+      // 只有编辑模式才执行
+      ready: isEdit,
+      // 自动取消上一次请求
+      refreshDeps: [id],
+      // 请求成功回调
+      onSuccess: (res) => {
         const data: any = res.data
         form.setFieldsValue(data)
         setSpecs(data.specs || [])
-      })
+      },
+      // 请求失败回调
+      onError: () => {
+        message.error('加载商品详情失败')
+      }
     }
-  }, [id, isEdit])
+  )
+
+  // ✅ 提交商品也使用 useRequest
+  const { run: submitProduct, loading: submitLoading } = useRequest(
+    async (values: any) => {
+      const data: Product = {
+        ...values,
+        specs,
+      }
+
+      if (isEdit) {
+        await updateProductApi(id!, data)
+      } else {
+        await createProductApi(data)
+      }
+    },
+    {
+      manual: true,
+      onSuccess: () => {
+        message.success('商品保存成功')
+        navigate('/products')
+      },
+      onError: () => {
+        message.error('保存失败，请检查输入')
+      }
+    }
+  )
 
   // 打开新增规格
   const openAddSpec = () => {
@@ -72,35 +107,13 @@ export default function ProductFormPage() {
     message.success('规格删除成功')
   }
 
-  // 提交商品
-  const onSubmit = async (values: any) => {
-    try {
-      setLoading(true)
-      const data: Product = {
-        ...values,
-        specs,
-      }
-
-      if (isEdit) {
-        await updateProductApi(+id, data)
-      } else {
-        await createProductApi(data)
-      }
-
-      message.success('商品保存成功')
-      navigate('/products')
-    } catch (e) {
-      message.error('保存失败，请检查输入')
-    } finally {
-      setLoading(false)
+  // 提交表单
+  const onSubmit = (values: any) => {
+    if (specs.length === 0) {
+      message.error("请添加规格")
+      return
     }
-  }
-
-  // 拼接图片完整地址
-  const getFullUrl = (url: string) => {
-    if (!url) return 'https://picsum.photos/200/200?text=无图'
-    if (url.startsWith('http')) return url
-    return `${STATIC_DOMAIN}/${url}`
+    submitProduct(values)
   }
 
   return (
@@ -115,8 +128,10 @@ export default function ProductFormPage() {
             form={form}
             layout="vertical"
             onFinish={onSubmit}
-            initialValues={{ status: 'draft', sort_order: 0 }}
+            initialValues={{ status: 'draft', sortOrder: 0 }}
             className="space-y-6"
+            // ✅ 加载详情时禁用表单
+            disabled={detailLoading}
           >
             {/* 商品名称 */}
             <Form.Item
@@ -201,7 +216,7 @@ export default function ProductFormPage() {
 
               <Form.Item
                 label="排序号"
-                name="sort_order"
+                name="sortOrder"
                 labelCol={{ className: 'font-medium text-gray-700' }}
                 extra="数字越小，排序越靠前"
               >
@@ -244,7 +259,6 @@ export default function ProductFormPage() {
                         >
                           编辑
                         </Button>,
-                        // ✅ 改为 Popconfirm 气泡确认
                         <Popconfirm
                           key="delete"
                           title="确认删除该规格？"
@@ -265,17 +279,17 @@ export default function ProductFormPage() {
                       ]}
                     >
                       <div className="flex items-center gap-4">
-                        <img
-                          src={getFullUrl(item.image)}
+                        <Image
+                          src={item.image}
                           alt={item.name}
-                          className="w-16 h-16 rounded-lg object-cover border border-gray-200"
+                          className="!w-16 !h-16 rounded-lg object-cover border border-gray-200"
                         />
                         <div className="flex-1">
                           <div className="font-medium text-gray-800">{item.name}</div>
                           <div className="text-sm text-gray-500 mt-1">
                             <span className="mr-4">价格：¥{item.price}</span>
                             <span className="mr-4">库存：{item.stock}</span>
-                            <span>SKU：{item.sku_code || '-'}</span>
+                            <span>SKU：{item.skuCode || '-'}</span>
                           </div>
                         </div>
                       </div>
@@ -297,15 +311,17 @@ export default function ProductFormPage() {
                 size="large"
                 onClick={() => navigate('/products')}
                 className="!px-16"
+                disabled={detailLoading || submitLoading}
               >
                 取消
               </Button>
               <Button
                 type="primary"
                 htmlType="submit"
-                loading={loading}
+                loading={submitLoading}
                 size="large"
                 className="!px-16"
+                disabled={detailLoading}
               >
                 保存
               </Button>
@@ -379,7 +395,7 @@ export default function ProductFormPage() {
 
           <Form.Item
             label="SKU编码"
-            name="sku_code"
+            name="skuCode"
             labelCol={{ className: 'font-medium text-gray-700' }}
           >
             <Input placeholder="商品唯一编码，用于库存管理" />
@@ -387,7 +403,7 @@ export default function ProductFormPage() {
 
           <Form.Item
             label="排序号"
-            name="sort_order"
+            name="sortOrder"
             labelCol={{ className: 'font-medium text-gray-700' }}
             extra="数字越小，排序越靠前"
           >
