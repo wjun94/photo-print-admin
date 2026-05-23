@@ -4,7 +4,8 @@ import { AuthGuard } from './AuthGuard'
 import AppLayout from '@/app/layout'
 import Login from '@/app/login/page'
 import Dashboard from '@/app/dashboard/page'
-import Products from '@/app/products/page'
+import Products from '@/app/products/list/page'
+import ProductsEdit from '@/app/products/edit/page'
 import Orders from '@/app/orders/page'
 import WxUsers from '@/app/wx-user/page'
 
@@ -21,6 +22,9 @@ const router = createBrowserRouter([
       { path: '/', element: <Navigate to="/dashboard" replace /> },
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/products', element: <Products /> },
+      { path: '/products/create', element: <ProductsEdit /> },
+      { path: '/products/edit/:id', element: <ProductsEdit /> },
+      { path: '/products/:id', element: <ProductsEdit /> },
       { path: '/orders', element: <Orders /> },
       {
         path: '/wx-users',

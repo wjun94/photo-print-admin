@@ -1,4 +1,4 @@
-// src/core/components/ProTable.tsx
+// src/components/ProTable.tsx
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { Table, Card, Button, Space, Form, Input, Select, DatePicker, message } from 'antd'
 import { ReloadOutlined, SearchOutlined, UndoOutlined } from '@ant-design/icons'

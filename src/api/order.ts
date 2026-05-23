@@ -1,6 +1,6 @@
 // src/api/order.ts
-import request, { PageList } from '@/core/lib/axios'
-import { PageParams, ApiResponse } from '@/core/components/ProTable'
+import request, { PageList } from '@/lib/axios'
+import { PageParams, ApiResponse } from '@/components'
 
 // 订单项类型
 export interface OrderItem {

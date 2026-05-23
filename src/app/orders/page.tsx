@@ -2,7 +2,7 @@
 import { useRef } from 'react'
 import { Tag, Button, Space, message } from 'antd'
 import { EyeOutlined } from '@ant-design/icons'
-import ProTable, { ProTableRef } from '@/core/components/ProTable'
+import { ProTable, ProTableRef } from '@/components'
 import { getOrderListApi, Order } from '@/api/order'
 
 export default function Orders() {

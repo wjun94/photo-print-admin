@@ -1,4 +1,4 @@
-import request from "@/core/lib/axios";
+import request from "@/lib/axios";
 
 // 登录参数类型
 export interface LoginParams {

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Image, Tag, Switch, Space, message, Modal } from 'antd'
-import ProTable, { ProTableRef, SearchField } from '@/core/components/ProTable'
+import { ProTable, ProTableRef, SearchField } from '@/components'
 import { getWxUserListApi, WxUser, updateWxUserStatusApi } from '@/api/user'
 
 export default function WxUsers() {

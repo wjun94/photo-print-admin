@@ -160,7 +160,7 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 通过 `PermissionGuard` 组件控制操作按钮的显示与隐藏：
 
 ```typescript
-import { PermissionGuard } from '@/core/components/PermissionGuard'
+import { PermissionGuard } from '@/components/PermissionGuard'
 
 // 只有拥有 product:add 权限的用户才能看到新增按钮
 <PermissionGuard permission="product:add">
@@ -173,8 +173,8 @@ import { PermissionGuard } from '@/core/components/PermissionGuard'
 封装 Ant Design Table 和 ahooks useRequest，一行代码实现带分页、加载状态的表格：
 
 ```typescript
-import { ProTable, PageParams, PageResponse } from '@/core/components/ProTable'
-import request from '@/core/lib/axios'
+import { ProTable, PageParams, PageResponse } from '@/components'
+import request from '@/lib/axios'
 
 interface Product {
   id: number
@@ -211,7 +211,7 @@ export default function Products() {
 自动添加 Token、统一错误处理、响应数据格式化：
 
 ```typescript
-// src/core/lib/axios.ts
+// src/lib/axios.ts
 import axios from 'axios'
 import { message } from 'antd'
 import { useAuthStore } from '@/stores/authStore'

@@ -1,0 +1,5 @@
+export { default as UploadImage } from './UploadImage'
+export * from './ProTable'
+export { default as ProTable } from './ProTable'
+export { PermissionGuard } from './PermissionGuard'
+export { default as Image } from './Image'

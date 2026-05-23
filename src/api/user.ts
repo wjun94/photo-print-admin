@@ -1,5 +1,5 @@
-import request from '@/core/lib/axios'
-import { PageParams, ApiResponse } from '@/core/components/ProTable'
+import request from '@/lib/axios'
+import { PageParams, ApiResponse } from '@/components'
 
 // 微信用户类型
 export interface WxUser {

@@ -59,7 +59,7 @@ export default function AppLayout() {
         </Header>
 
         {/* 页面内容 */}
-        <Content className="m-4 p-4 bg-white rounded-lg shadow-sm">
+        <Content className="m-4 p-4 bg-white rounded-lg shadow-sm overflow-auto">
           <Outlet />
         </Content>
       </Layout>
