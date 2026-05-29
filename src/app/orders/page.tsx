@@ -105,7 +105,7 @@ export default function Orders() {
                     <div className="flex items-center gap-2">
                         <Image
                             src={spec.imageUrl}
-                            style={{ height: '60px', width: '60px', borderRadius: "8px" }}
+                            style={{ height: '60px', width: '60px', borderRadius: "6px" }}
                             className="object-cover"
                         />
                         <div className="flex-1 min-w-0">
