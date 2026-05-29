@@ -85,7 +85,7 @@ export default function Orders() {
                         }}
                         className="text-xs font-medium text-gray-800"
                     >
-                        订单号：{record.orderNo}
+                        订单编号：{record.orderNo}
                     </Text>
                     <div className="text-xs text-gray-500">创建时间：{record.createdAt}</div>
                 </div>
