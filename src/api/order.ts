@@ -15,15 +15,44 @@ export interface OrderItem {
 
 // 订单类型
 export interface Order {
-  id: number
+  id: string
   orderNo: string
-  userId: number
-  address: string
-  amount: number
-  status: string
+  userId: string
+  status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
   createdAt: string
   updatedAt: string
-  items: OrderItem[]
+  remark: string
+  amount: number
+  freight: number
+  actualAmount: number
+
+  specs: {
+    productId: string
+    productName: string
+    specId: string
+    specName: string
+    price: number
+    totalQuantity: number
+    totalSubtotal: number
+    imageUrl: string
+  }[]
+
+  address: {
+    id: string
+    orderId: string
+    receiverName: string
+    mobile: string
+    provinceId: string
+    provinceName: string
+    cityId: string
+    cityName: string
+    districtId: string
+    districtName: string
+    detail: string
+    doorplate: string
+    createdAt: string
+    updatedAt: string
+  }
 }
 
 // 订单列表请求参数

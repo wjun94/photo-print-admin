@@ -1,11 +1,30 @@
-// src/app/orders/page.tsx
-import { useRef } from 'react'
-import { Tag, Button, Space, message } from 'antd'
-import { EyeOutlined } from '@ant-design/icons'
-import { ProTable, ProTableRef } from '@/components'
+import { useRef, useState } from 'react'
+import {
+    Typography,
+    Tag,
+    Button,
+    Space,
+    message,
+    Modal,
+    Form,
+    Input,
+    Row,
+    Col
+} from 'antd'
+import { EyeOutlined, DeliveredProcedureOutlined } from '@ant-design/icons'
+import { ProTable, ProTableRef, Image } from '@/components'
 import { getOrderListApi, Order } from '@/api/order'
 
+const { Text } = Typography
+
 export default function Orders() {
+    const [form] = Form.useForm()
+    const tableRef = useRef<ProTableRef>(null)
+
+    // 发货弹窗
+    const [deliveryVisible, setDeliveryVisible] = useState(false)
+    const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
+
     // 订单状态映射
     const statusMap: Record<string, { text: string; color: string }> = {
         pending: { text: '待付款', color: 'orange' },
@@ -15,14 +34,9 @@ export default function Orders() {
         cancelled: { text: '已取消', color: 'red' }
     }
 
-    // ✅ 搜索字段配置（只需要写这个，表单自动生成）
+    // 搜索字段
     const searchFields = [
-        {
-            name: 'orderNo',
-            label: '订单号',
-            type: 'input',
-            placeholder: '请输入订单号'
-        },
+        { name: 'orderNo', label: '订单号', type: 'input', placeholder: '请输入订单号' },
         {
             name: 'status',
             label: '订单状态',
@@ -35,84 +49,211 @@ export default function Orders() {
                 { value: 'cancelled', label: '已取消' }
             ]
         },
-        {
-            name: 'createdAt',
-            label: '创建时间',
-            type: 'dateRange'
-        }
+        { name: 'createdAt', label: '创建时间', type: 'dateRange' }
     ]
 
-    // 表格列定义
+    // 打开发货弹窗
+    const openDelivery = (record: Order) => {
+        setCurrentOrder(record)
+        form.resetFields()
+        setDeliveryVisible(true)
+    }
+
+    // 提交发货
+    const handleDelivery = () => {
+        form.validateFields().then(values => {
+            message.success(`订单 ${currentOrder?.orderNo} 发货成功`)
+            setDeliveryVisible(false)
+            tableRef.current?.handleRefresh()
+        })
+    }
+
+    // 表格列
     const columns = [
+        // ========== 订单信息（合并展示） ==========
         {
-            title: '订单号',
-            dataIndex: 'orderNo',
-            key: 'orderNo',
-            width: 180,
-            fixed: 'left'
+            title: '订单信息',
+            key: 'orderInfo',
+            width: 260,
+            fixed: 'left',
+            render: (_: unknown, record: Order) => (
+                <div className="space-y-1">
+                    <Text
+                        copyable={{
+                            text: record.orderNo,
+                            tooltips: ['复制订单号', '已复制！'],
+                        }}
+                        className="text-xs font-medium text-gray-800"
+                    >
+                        订单号：{record.orderNo}
+                    </Text>
+                    <div className="text-xs text-gray-500">创建时间：{record.createdAt}</div>
+                </div>
+            )
         },
+
+        // ========== 商品信息（图片+名称+规格+数量） ==========
         {
-            title: '订单金额',
-            dataIndex: 'amount',
+            title: '商品信息',
+            key: 'goods',
+            width: 280,
+            render: (_: unknown, record: Order) => {
+                const spec = record.specs?.[0]
+                if (!spec) return <span>-</span>
+
+                return (
+                    <div className="flex items-center gap-2">
+                        <Image
+                            src={spec.imageUrl}
+                            style={{ height: '60px', width: '60px', borderRadius: "8px" }}
+                            className="object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                            <div className="text-xs truncate">{spec.productName}</div>
+                            <div className="text-xs text-gray-500">
+                                {spec.specName} × {spec.totalQuantity}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        },
+
+        // ========== 收货地址 ==========
+        {
+            title: '收货地址',
+            key: 'address',
+            width: 240,
+            render: (_: unknown, record: Order) => {
+                const addr = record.address
+                if (!addr) return '-'
+                return (
+                    <div className="text-xs text-gray-600 leading-relaxed">
+                        <div>{addr.receiverName} {addr.mobile}</div>
+                        <div className="truncate">
+                            {addr.provinceName}{addr.cityName}{addr.districtName}
+                        </div>
+                        <div className="truncate">{addr.detail}{addr.doorplate}</div>
+                    </div>
+                )
+            }
+        },
+
+        // ========== 金额信息 ==========
+        {
+            title: '金额信息',
             key: 'amount',
-            render: (amount: number) => `¥${amount.toFixed(2)}`
+            width: 160,
+            render: (_: unknown, record: Order) => (
+                <div>
+                    <div className="text-xs text-red-600">
+                        实付 ¥{record.actualAmount?.toFixed(2)}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                        商品 ¥{record.amount?.toFixed(2)}
+                        <br />
+                        运费 ¥{record.freight?.toFixed(2)}
+                    </div>
+                </div>
+            )
         },
+
+        // ========== 订单状态 ==========
         {
             title: '状态',
             dataIndex: 'status',
-            key: 'status',
+            width: 110,
             render: (status: string) => {
                 const info = statusMap[status] || { text: status, color: 'default' }
                 return <Tag color={info.color}>{info.text}</Tag>
             }
         },
-        {
-            title: '收货地址',
-            dataIndex: 'address',
-            key: 'address',
-            ellipsis: true
-        },
-        {
-            title: '商品数量',
-            key: 'items',
-            render: (_: unknown, record: Order) => record.items.length
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createdAt',
-            key: 'createdAt',
-            width: 180
-        },
+
+        // ========== 操作 ==========
         {
             title: '操作',
             key: 'action',
             fixed: 'right',
-            width: 100,
+            width: 140,
             render: (_: unknown, record: Order) => (
-                <Space>
+                <Space direction="vertical" size={4} className="w-full">
                     <Button
-                        type="link"
+                        type="text"
                         icon={<EyeOutlined />}
-                        onClick={() => message.info(`查看订单：${record.orderNo}`)}
+                        className="text-blue-600 h-auto py-1"
+                        onClick={() => message.info('查看订单详情')}
                     >
-                        详情
+                        查看详情
                     </Button>
+
+                    {/* 待付款 → 显示去发货按钮 */}
+                    {record.status === 'paid' && (
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<DeliveredProcedureOutlined />}
+                            onClick={() => openDelivery(record)}
+                            className="h-auto py-1"
+                        >
+                            去发货
+                        </Button>
+                    )}
                 </Space>
             )
         }
     ]
 
-    const tableRef = useRef<ProTableRef>(null)
-
     return (
-        <ProTable<Order>
-            ref={tableRef}
-            columns={columns}
-            request={getOrderListApi}
-            rowKey="id"
-            title="订单列表"
-            scroll={{ x: 1200 }}
-            searchFields={searchFields} // ✅ 传入搜索配置
-        />
+        <div className="h-full">
+            <ProTable<Order>
+                ref={tableRef}
+                title="订单管理"
+                columns={columns}
+                request={getOrderListApi}
+                rowKey="id"
+                searchFields={searchFields}
+                scroll={{ x: 1300 }}
+                className="bg-white rounded-lg shadow-sm"
+                rowClassName="hover:bg-gray-50"
+            />
+
+            {/* 发货弹窗 */}
+            <Modal
+                title={`订单发货 - ${currentOrder?.orderNo}`}
+                open={deliveryVisible}
+                onCancel={() => setDeliveryVisible(false)}
+                onOk={handleDelivery}
+                width={500}
+                okText="确认发货"
+                cancelText="取消"
+            >
+                <Form form={form} layout="vertical" className="mt-2">
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                label="快递公司"
+                                name="expressCompany"
+                                rules={[{ required: true, message: '请输入快递公司' }]}
+                            >
+                                <Input placeholder="如：顺丰速运" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="快递单号"
+                                name="expressNo"
+                                rules={[{ required: true, message: '请输入快递单号' }]}
+                            >
+                                <Input placeholder="请输入快递单号" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Form.Item label="备注" name="remark">
+                        <Input.TextArea rows={3} placeholder="选填" />
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>
     )
 }
