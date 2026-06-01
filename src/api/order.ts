@@ -27,10 +27,10 @@ export interface Order {
   actualAmount: number
 
   // ✅ 新增各状态时间字段
-  payTime?: string
-  finishTime?: string
+  payAt?: string
+  finishAt?: string
   shippedAt?: string
-  cancelTime?: string
+  cancelAt?: string
 
   specs: {
     productId: string

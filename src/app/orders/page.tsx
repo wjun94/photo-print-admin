@@ -44,10 +44,10 @@ export default function Orders() {
         times.push({ label: '创建', value: record.createdAt })
 
         // 根据状态逐步添加后续时间
-        if (record.payTime) times.push({ label: '支付', value: record.payTime })
+        if (record.payAt) times.push({ label: '支付', value: record.payAt })
         if (record.shippedAt) times.push({ label: '发货', value: record.shippedAt })
-        if (record.finishTime) times.push({ label: '完成', value: record.finishTime })
-        if (record.cancelTime) times.push({ label: '取消', value: record.cancelTime })
+        if (record.finishAt) times.push({ label: '完成', value: record.finishAt })
+        if (record.cancelAt) times.push({ label: '取消', value: record.cancelAt })
 
         return times
     }
@@ -223,7 +223,7 @@ export default function Orders() {
             render: (_: unknown, record: Order) => (
                 <div>
                     <div className={`text-xs font-medium ${record.status === 'pending' ? 'text-gray-500' : 'text-red-600'}`}>
-                        {record.status === 'pending'
+                        {record.payAt === 'pending'
                             ? '待付'
                             : `实付 ¥${record.actualAmount?.toFixed(2)}`
                         }
