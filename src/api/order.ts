@@ -26,6 +26,12 @@ export interface Order {
   freight: number
   actualAmount: number
 
+  // ✅ 新增各状态时间字段
+  payTime?: string
+  finishTime?: string
+  shippedAt?: string
+  cancelTime?: string
+
   specs: {
     productId: string
     productName: string
@@ -63,4 +69,15 @@ export interface OrderListParams extends PageParams {
 // 获取订单列表接口（完全匹配你的后端接口）
 export function getOrderListApi(params: OrderListParams) {
   return request.get<ApiResponse<PageList<Order[]>>>('/admin/orders', { params })
+}
+
+// 去发货
+export function orderShip(data: any) {
+  return request.post('/admin/order/ship', data)
+}
+
+
+// 完成订单
+export function orderComplete(data: any) {
+  return request.post('/admin/order/complete', data)
 }

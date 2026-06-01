@@ -9,11 +9,13 @@ import {
     Form,
     Input,
     Row,
-    Col
+    Col,
+    Select
 } from 'antd'
-import { EyeOutlined, DeliveredProcedureOutlined } from '@ant-design/icons'
+import { EyeOutlined, DeliveredProcedureOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import { useRequest } from 'ahooks'
 import { ProTable, ProTableRef, Image } from '@/components'
-import { getOrderListApi, Order } from '@/api/order'
+import { getOrderListApi, Order, orderShip, orderComplete, couriers } from '@/api'
 
 const { Text } = Typography
 
@@ -33,6 +35,63 @@ export default function Orders() {
         completed: { text: '已完成', color: 'gray' },
         cancelled: { text: '已取消', color: 'red' }
     }
+
+    // ✅ 优化：获取订单所有已产生的时间
+    const getStatusTimes = (record: Order) => {
+        const times: { label: string; value: string }[] = []
+
+        // 所有订单都有创建时间
+        times.push({ label: '创建', value: record.createdAt })
+
+        // 根据状态逐步添加后续时间
+        if (record.payTime) times.push({ label: '支付', value: record.payTime })
+        if (record.shippedAt) times.push({ label: '发货', value: record.shippedAt })
+        if (record.finishTime) times.push({ label: '完成', value: record.finishTime })
+        if (record.cancelTime) times.push({ label: '取消', value: record.cancelTime })
+
+        return times
+    }
+
+    // 动态获取快递公司列表
+    const { data, loading: courierLoading } = useRequest(couriers)
+    const courierList = data?.data || []
+
+    // 发货接口
+    const { run: submitShip, loading: shipLoading } = useRequest(
+        (params: {
+            orderId: string
+            courierCode: string
+            trackingNo: string
+            courierName: string
+            remark?: string
+        }) => orderShip(params),
+        {
+            manual: true,
+            onSuccess: () => {
+                message.success('发货成功')
+                setDeliveryVisible(false)
+                tableRef.current?.handleRefresh()
+            },
+            onError: () => {
+                message.error('发货失败，请稍后重试')
+            }
+        }
+    )
+
+    // 完成订单接口
+    const { run: submitComplete, loading: completeLoading } = useRequest(
+        (orderId: string) => orderComplete({ orderId }),
+        {
+            manual: true,
+            onSuccess: () => {
+                message.success('订单已完成')
+                tableRef.current?.handleRefresh()
+            },
+            onError: () => {
+                message.error('操作失败，请稍后重试')
+            }
+        }
+    )
 
     // 搜索字段
     const searchFields = [
@@ -62,34 +121,50 @@ export default function Orders() {
     // 提交发货
     const handleDelivery = () => {
         form.validateFields().then(values => {
-            message.success(`订单 ${currentOrder?.orderNo} 发货成功`)
-            setDeliveryVisible(false)
-            tableRef.current?.handleRefresh()
+            // 找到选中的快递公司名称
+            const selectedCourier = courierList.find(item => item.code === values.courierCode)
+
+            submitShip({
+                orderId: currentOrder!.id,
+                courierCode: values.courierCode,
+                trackingNo: values.trackingNo,
+                courierName: selectedCourier?.name || '',
+                remark: values.remark
+            })
         })
     }
 
     // 表格列
     const columns = [
-        // ========== 订单信息（合并展示） ==========
+        // ========== 订单信息（多时间并行展示） ==========
         {
             title: '订单信息',
             key: 'orderInfo',
             width: 260,
             fixed: 'left',
-            render: (_: unknown, record: Order) => (
-                <div className="space-y-1">
-                    <Text
-                        copyable={{
-                            text: record.orderNo,
-                            tooltips: ['复制订单号', '已复制！'],
-                        }}
-                        className="text-xs font-medium text-gray-800"
-                    >
-                        订单编号：{record.orderNo}
-                    </Text>
-                    <div className="text-xs text-gray-500">创建时间：{record.createdAt}</div>
-                </div>
-            )
+            render: (_: unknown, record: Order) => {
+                const times = getStatusTimes(record)
+                return (
+                    <div className="space-y-1">
+                        <Text
+                            copyable={{
+                                text: record.orderNo,
+                                tooltips: ['复制订单号', '已复制！'],
+                            }}
+                            className="text-xs font-medium text-gray-800"
+                        >
+                            {record.orderNo}
+                        </Text>
+                        <div className="space-y-0.5">
+                            {times.map((time, index) => (
+                                <div key={index} className="text-xs text-gray-500">
+                                    {time.label}：{time.value}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )
+            }
         },
 
         // ========== 商品信息（图片+名称+规格+数量） ==========
@@ -107,6 +182,7 @@ export default function Orders() {
                             src={spec.imageUrl}
                             style={{ height: '60px', width: '60px', borderRadius: "6px" }}
                             className="object-cover"
+                            fallback="https://picsum.photos/200/200?text=无图"
                         />
                         <div className="flex-1 min-w-0">
                             <div className="text-xs truncate">{spec.productName}</div>
@@ -139,15 +215,18 @@ export default function Orders() {
             }
         },
 
-        // ========== 金额信息 ==========
+        // ========== 金额信息（待付款显示"待付"） ==========
         {
             title: '金额信息',
             key: 'amount',
             width: 160,
             render: (_: unknown, record: Order) => (
                 <div>
-                    <div className="text-xs text-red-600">
-                        实付 ¥{record.actualAmount?.toFixed(2)}
+                    <div className={`text-xs font-medium ${record.status === 'pending' ? 'text-gray-500' : 'text-red-600'}`}>
+                        {record.status === 'pending'
+                            ? '待付'
+                            : `实付 ¥${record.actualAmount?.toFixed(2)}`
+                        }
                     </div>
                     <div className="text-xs text-gray-500">
                         商品 ¥{record.amount?.toFixed(2)}
@@ -186,7 +265,7 @@ export default function Orders() {
                         查看详情
                     </Button>
 
-                    {/* 待付款 → 显示去发货按钮 */}
+                    {/* 已付款 → 显示去发货按钮 */}
                     {record.status === 'paid' && (
                         <Button
                             type="primary"
@@ -196,6 +275,20 @@ export default function Orders() {
                             className="h-auto py-1"
                         >
                             去发货
+                        </Button>
+                    )}
+
+                    {/* 已发货 → 显示完成订单按钮 */}
+                    {record.status === 'shipped' && (
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<CheckCircleOutlined />}
+                            onClick={() => submitComplete(record.id)}
+                            loading={completeLoading}
+                            className="h-auto py-1 bg-green-600 hover:bg-green-700"
+                        >
+                            完成订单
                         </Button>
                     )}
                 </Space>
@@ -226,22 +319,32 @@ export default function Orders() {
                 width={500}
                 okText="确认发货"
                 cancelText="取消"
+                confirmLoading={shipLoading}
+                maskClosable={false}
             >
                 <Form form={form} layout="vertical" className="mt-2">
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
                                 label="快递公司"
-                                name="expressCompany"
-                                rules={[{ required: true, message: '请输入快递公司' }]}
+                                name="courierCode"
+                                rules={[{ required: true, message: '请选择快递公司' }]}
                             >
-                                <Input placeholder="如：顺丰速运" />
+                                <Select
+                                    placeholder="请选择快递公司"
+                                    loading={courierLoading}
+                                    options={courierList.map(item => ({
+                                        value: item.code,
+                                        label: item.name
+                                    }))}
+                                    showSearch
+                                />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
                             <Form.Item
                                 label="快递单号"
-                                name="expressNo"
+                                name="trackingNo"
                                 rules={[{ required: true, message: '请输入快递单号' }]}
                             >
                                 <Input placeholder="请输入快递单号" />
@@ -250,7 +353,7 @@ export default function Orders() {
                     </Row>
 
                     <Form.Item label="备注" name="remark">
-                        <Input.TextArea rows={3} placeholder="选填" />
+                        <Input.TextArea rows={3} placeholder="选填，填写发货备注信息" />
                     </Form.Item>
                 </Form>
             </Modal>
