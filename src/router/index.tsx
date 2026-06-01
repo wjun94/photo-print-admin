@@ -8,6 +8,7 @@ import Products from '@/app/products/list/page'
 import ProductsEdit from '@/app/products/edit/page'
 import Orders from '@/app/orders/page'
 import WxUsers from '@/app/wx-user/page'
+import OrderDetail from '@/app/orders/[id]/page' // 导入详情页组件
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,11 @@ const router = createBrowserRouter([
       { path: '/products/create', element: <ProductsEdit /> },
       { path: '/products/edit/:id', element: <ProductsEdit /> },
       { path: '/orders', element: <Orders /> },
+      // ✅ 添加动态路由
+      {
+        path: '/orders/:id',
+        element: <OrderDetail />
+      },
       {
         path: '/wx-users',
         element: <WxUsers />

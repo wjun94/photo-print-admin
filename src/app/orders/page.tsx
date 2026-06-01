@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
     Typography,
     Tag,
@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons'
 import { useRequest } from 'ahooks'
 import { ProTable, ProTableRef, Image } from '@/components'
+import { useNavigate } from 'react-router-dom'
 import { getOrderListApi, Order, orderShip, orderComplete, couriers } from '@/api'
 
 const { Text } = Typography
@@ -26,6 +27,7 @@ const { Text } = Typography
 export default function Orders() {
     const [form] = Form.useForm()
     const tableRef = useRef<ProTableRef>(null)
+    const navigate = useNavigate()
 
     // 发货弹窗
     const [deliveryVisible, setDeliveryVisible] = useState(false)
@@ -266,7 +268,9 @@ export default function Orders() {
                         type="text"
                         icon={<EyeOutlined />}
                         className="text-blue-600 h-auto py-1"
-                        onClick={() => message.info('查看订单详情')}
+                        onClick={async () => {
+                            navigate(`/orders/${record.id}`)
+                        }}
                     >
                         查看详情
                     </Button >
@@ -288,7 +292,7 @@ export default function Orders() {
 
                     {/* 已发货/已完成 → 显示查看物流按钮 */}
                     {
-                        (record.status === 'shipped' || record.status === 'completed') && record?.logistics?.length > 0 && (
+                        (record.status === 'shipped' || record.status === 'completed') && (record as any)?.logistics?.length > 0 && (
                             <Button
                                 type="text"
                                 icon={<TruckOutlined />}
