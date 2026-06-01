@@ -222,11 +222,11 @@ export default function Orders() {
             width: 160,
             render: (_: unknown, record: Order) => (
                 <div>
-                    <div className={`text-xs font-medium ${record.status === 'pending' ? 'text-gray-500' : 'text-red-600'}`}>
-                        {record.payAt === 'pending'
-                            ? '待付'
-                            : `实付 ¥${record.actualAmount?.toFixed(2)}`
-                        }
+                    <div className={`text-xs font-medium ${record.payAt ? 'text-red-600' : 'text-gray-500'}`}>
+                        {record.payAt
+                            ? '实付'
+                            : '待付'
+                        } ¥{record.actualAmount?.toFixed(2)}
                     </div>
                     <div className="text-xs text-gray-500">
                         商品 ¥{record.amount?.toFixed(2)}
