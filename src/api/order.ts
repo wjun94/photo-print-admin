@@ -13,6 +13,18 @@ export interface OrderItem {
   spec: string
 }
 
+export interface Logistics {
+  id: string
+  orderId: string
+  courierCode: string
+  courierName: string
+  trackingNo: string
+  remark?: string
+  createdAt: string
+  updatedAt: string
+}
+
+
 // 订单类型
 export interface Order {
   id: string
@@ -31,6 +43,8 @@ export interface Order {
   finishAt?: string
   shippedAt?: string
   cancelAt?: string
+
+  logistics?: Logistics[]
 
   specs: {
     productId: string

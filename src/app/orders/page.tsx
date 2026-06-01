@@ -10,9 +10,13 @@ import {
     Input,
     Row,
     Col,
-    Select
+    Select,
+    Divider
 } from 'antd'
-import { EyeOutlined, DeliveredProcedureOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import {
+    EyeOutlined, DeliveredProcedureOutlined, CheckCircleOutlined,
+    TruckOutlined
+} from '@ant-design/icons'
 import { useRequest } from 'ahooks'
 import { ProTable, ProTableRef, Image } from '@/components'
 import { getOrderListApi, Order, orderShip, orderComplete, couriers } from '@/api'
@@ -27,6 +31,9 @@ export default function Orders() {
     const [deliveryVisible, setDeliveryVisible] = useState(false)
     const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
 
+    // ✅ 物流弹窗
+    const [logisticsVisible, setLogisticsVisible] = useState(false)
+
     // 订单状态映射
     const statusMap: Record<string, { text: string; color: string }> = {
         pending: { text: '待付款', color: 'orange' },
@@ -36,14 +43,11 @@ export default function Orders() {
         cancelled: { text: '已取消', color: 'red' }
     }
 
-    // ✅ 优化：获取订单所有已产生的时间
+    // 获取订单所有已产生的时间
     const getStatusTimes = (record: Order) => {
         const times: { label: string; value: string }[] = []
 
-        // 所有订单都有创建时间
         times.push({ label: '创建', value: record.createdAt })
-
-        // 根据状态逐步添加后续时间
         if (record.payAt) times.push({ label: '支付', value: record.payAt })
         if (record.shippedAt) times.push({ label: '发货', value: record.shippedAt })
         if (record.finishAt) times.push({ label: '完成', value: record.finishAt })
@@ -118,10 +122,15 @@ export default function Orders() {
         setDeliveryVisible(true)
     }
 
+    // ✅ 查看物流信息
+    const openLogistics = (record: Order) => {
+        setCurrentOrder(record)
+        setLogisticsVisible(true)
+    }
+
     // 提交发货
     const handleDelivery = () => {
         form.validateFields().then(values => {
-            // 找到选中的快递公司名称
             const selectedCourier = courierList.find(item => item.code === values.courierCode)
 
             submitShip({
@@ -136,7 +145,7 @@ export default function Orders() {
 
     // 表格列
     const columns = [
-        // ========== 订单信息（多时间并行展示） ==========
+        // 订单信息（多时间并行展示）
         {
             title: '订单信息',
             key: 'orderInfo',
@@ -167,7 +176,7 @@ export default function Orders() {
             }
         },
 
-        // ========== 商品信息（图片+名称+规格+数量） ==========
+        // 商品信息
         {
             title: '商品信息',
             key: 'goods',
@@ -195,7 +204,7 @@ export default function Orders() {
             }
         },
 
-        // ========== 收货地址 ==========
+        // 收货地址
         {
             title: '收货地址',
             key: 'address',
@@ -215,7 +224,7 @@ export default function Orders() {
             }
         },
 
-        // ========== 金额信息（待付款显示"待付"） ==========
+        // 金额信息
         {
             title: '金额信息',
             key: 'amount',
@@ -223,10 +232,7 @@ export default function Orders() {
             render: (_: unknown, record: Order) => (
                 <div>
                     <div className={`text-xs font-medium ${record.payAt ? 'text-red-600' : 'text-gray-500'}`}>
-                        {record.payAt
-                            ? '实付'
-                            : '待付'
-                        } ¥{record.actualAmount?.toFixed(2)}
+                        {record.payAt ? '实付' : '待付'} ¥{record.actualAmount?.toFixed(2)}
                     </div>
                     <div className="text-xs text-gray-500">
                         商品 ¥{record.amount?.toFixed(2)}
@@ -237,7 +243,7 @@ export default function Orders() {
             )
         },
 
-        // ========== 订单状态 ==========
+        // 订单状态
         {
             title: '状态',
             dataIndex: 'status',
@@ -248,14 +254,14 @@ export default function Orders() {
             }
         },
 
-        // ========== 操作 ==========
+        // 操作
         {
             title: '操作',
             key: 'action',
             fixed: 'right',
-            width: 140,
+            width: 180,
             render: (_: unknown, record: Order) => (
-                <Space direction="vertical" size={4} className="w-full">
+                <Space vertical size={2} className="w - full">
                     <Button
                         type="text"
                         icon={<EyeOutlined />}
@@ -263,35 +269,53 @@ export default function Orders() {
                         onClick={() => message.info('查看订单详情')}
                     >
                         查看详情
-                    </Button>
+                    </Button >
 
                     {/* 已付款 → 显示去发货按钮 */}
-                    {record.status === 'paid' && (
-                        <Button
-                            type="primary"
-                            size="small"
-                            icon={<DeliveredProcedureOutlined />}
-                            onClick={() => openDelivery(record)}
-                            className="h-auto py-1"
-                        >
-                            去发货
-                        </Button>
-                    )}
+                    {
+                        record.status === 'paid' && (
+                            <Button
+                                type="primary"
+                                size="small"
+                                icon={<DeliveredProcedureOutlined />}
+                                onClick={() => openDelivery(record)}
+                                className="h-auto py-1"
+                            >
+                                去发货
+                            </Button>
+                        )
+                    }
+
+                    {/* 已发货/已完成 → 显示查看物流按钮 */}
+                    {
+                        (record.status === 'shipped' || record.status === 'completed') && record?.logistics?.length > 0 && (
+                            <Button
+                                type="text"
+                                icon={<TruckOutlined />}
+                                className="text-green-600 h-auto py-1"
+                                onClick={() => openLogistics(record)}
+                            >
+                                查看物流
+                            </Button>
+                        )
+                    }
 
                     {/* 已发货 → 显示完成订单按钮 */}
-                    {record.status === 'shipped' && (
-                        <Button
-                            type="primary"
-                            size="small"
-                            icon={<CheckCircleOutlined />}
-                            onClick={() => submitComplete(record.id)}
-                            loading={completeLoading}
-                            className="h-auto py-1 bg-green-600 hover:bg-green-700"
-                        >
-                            完成订单
-                        </Button>
-                    )}
-                </Space>
+                    {
+                        record.status === 'shipped' && (
+                            <Button
+                                type="primary"
+                                size="small"
+                                icon={<CheckCircleOutlined />}
+                                onClick={() => submitComplete(record.id)}
+                                loading={completeLoading}
+                                className="h-auto py-1 bg-green-600 hover:bg-green-700"
+                            >
+                                完成订单
+                            </Button>
+                        )
+                    }
+                </Space >
             )
         }
     ]
@@ -356,6 +380,49 @@ export default function Orders() {
                         <Input.TextArea rows={3} placeholder="选填，填写发货备注信息" />
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            {/* ✅ 物流信息弹窗 */}
+            <Modal
+                title={`物流信息 - ${currentOrder?.orderNo}`}
+                open={logisticsVisible}
+                onCancel={() => setLogisticsVisible(false)}
+                footer={null}
+                width={500}
+            >
+                <div className="mt-4">
+                    {currentOrder?.logistics?.map((logistic, index) => (
+                        <div key={logistic.id}>
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <div className="flex justify-between items-center mb-2">
+                                    <div className="font-medium text-gray-800">
+                                        {logistic.courierName} ({logistic.courierCode})
+                                    </div>
+                                    <Text
+                                        copyable={{
+                                            text: logistic.trackingNo,
+                                            tooltips: ['复制单号', '已复制！']
+                                        }}
+                                        className="text-blue-600 cursor-pointer"
+                                    >
+                                        快递单号：{logistic.trackingNo}
+                                    </Text>
+                                </div>
+                                {logistic.remark && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        备注：{logistic.remark}
+                                    </div>
+                                )}
+                                <div className="text-xs text-gray-400 mt-2">
+                                    发货时间：{logistic.createdAt}
+                                </div>
+                            </div>
+                            {index < (currentOrder?.logistics?.length || 0) - 1 && (
+                                <Divider className="my-3" />
+                            )}
+                        </div>
+                    ))}
+                </div>
             </Modal>
         </div>
     )
