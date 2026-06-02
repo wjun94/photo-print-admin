@@ -1,11 +1,9 @@
 import { useRef } from 'react'
-import { Tag, Button, Space, message, Popconfirm, Typography } from 'antd'
-import { PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons'
+import { Tag, Button, Space, message, Popconfirm } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined, CopyOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { ProTable, ProTableRef, SearchField, Image } from '@/components'
 import { getProductListApi, deleteProductApi, Product } from '@/api/product'
-
-const { Text } = Typography
 
 export default function Products() {
   const navigate = useNavigate()
