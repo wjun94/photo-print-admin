@@ -60,7 +60,7 @@ export default function CommissionSettings() {
         {/* 佣金设置卡片 */}
         <Card variant="borderless" className="shadow-sm">
           <div className="mb-6">
-            <Title level={5} style={{ marginBottom: 4 }}>佣金比例设置</Title>
+            <Title level={5} style={{ marginBottom: '10px' }}>佣金比例设置</Title>
             <Alert
               title="佣金比例为订单实付金额的百分比，设置后仅对新创建的订单生效"
               type="info"
