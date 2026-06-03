@@ -6,7 +6,8 @@ import {
   DashboardOutlined,
   ShoppingOutlined,
   LogoutOutlined,
-  OrderedListOutlined
+  OrderedListOutlined,
+  MoneyCollectOutlined
 } from '@ant-design/icons'
 
 const { Header, Sider, Content } = Layout
@@ -20,7 +21,8 @@ export default function AppLayout() {
     { key: '/dashboard', icon: <DashboardOutlined />, label: '首页' },
     { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
     { key: '/orders', icon: <OrderedListOutlined />, label: '订单管理' },
-    { key: '/wx-users', icon: <UserOutlined />, label: '微信用户' },
+    { key: '/wx-users', icon: <UserOutlined />, label: '用户管理' },
+    { key: '/commission', icon: <MoneyCollectOutlined />, label: '佣金管理' },
   ]
 
   const userMenu = [
