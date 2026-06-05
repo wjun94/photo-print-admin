@@ -7,7 +7,8 @@ import {
   ShoppingOutlined,
   LogoutOutlined,
   OrderedListOutlined,
-  MoneyCollectOutlined
+  MoneyCollectOutlined,
+  QrcodeOutlined,
 } from '@ant-design/icons'
 
 const { Header, Sider, Content } = Layout
@@ -23,6 +24,11 @@ export default function AppLayout() {
     { key: '/orders', icon: <OrderedListOutlined />, label: '订单管理' },
     { key: '/wx-users', icon: <UserOutlined />, label: '用户管理' },
     { key: '/commission', icon: <MoneyCollectOutlined />, label: '佣金管理' },
+    {
+      key: '/settings/qrcode',
+      icon: <QrcodeOutlined />,
+      label: '二维码管理'
+    }
   ]
 
   const userMenu = [
