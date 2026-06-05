@@ -28,7 +28,7 @@ const router = createBrowserRouter([
       { path: '/products/create', element: <ProductsEdit /> },
       { path: '/products/edit/:id', element: <ProductsEdit /> },
       { path: '/orders', element: <Orders /> },
-      { path: '/commission', element: <Commission /> },
+      { path: '/settings/commission', element: <Commission /> },
       // React Router
       { path: '/settings/qrcode', element: <QrcodeSettings /> },
       // ✅ 添加动态路由

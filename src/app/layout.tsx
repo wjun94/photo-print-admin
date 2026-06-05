@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   OrderedListOutlined,
   MoneyCollectOutlined,
+  SettingOutlined,
   QrcodeOutlined,
 } from '@ant-design/icons'
 
@@ -23,11 +24,23 @@ export default function AppLayout() {
     { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
     { key: '/orders', icon: <OrderedListOutlined />, label: '订单管理' },
     { key: '/wx-users', icon: <UserOutlined />, label: '用户管理' },
-    { key: '/commission', icon: <MoneyCollectOutlined />, label: '佣金管理' },
+    // ✅ 系统设置下拉菜单
     {
-      key: '/settings/qrcode',
-      icon: <QrcodeOutlined />,
-      label: '二维码管理'
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: '系统设置',
+      children: [
+        {
+          key: '/settings/commission',
+          icon: <MoneyCollectOutlined />,
+          label: '佣金管理'
+        },
+        {
+          key: '/settings/qrcode',
+          icon: <QrcodeOutlined />,
+          label: '二维码管理'
+        }
+      ]
     }
   ]
 
