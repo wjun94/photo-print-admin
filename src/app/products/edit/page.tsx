@@ -307,7 +307,7 @@ export default function ProductFormPage() {
                 {specAttributes.map((attr, index) => (
                   <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
                     <div className="w-1/4">
-                      <div className="text-xs text-gray-500 mb-1">规格名</div>
+                      <div className="text-xs text-gray-500 mb-1">规格名 (如: 颜色、尺寸)</div>
                       <Input
                         value={attr.name}
                         placeholder="规格名称"
