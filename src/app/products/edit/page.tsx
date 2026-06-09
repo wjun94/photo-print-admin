@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import {
   Form, Input, Select, Button, InputNumber,
-  Card, Table, message, Space, Popconfirm, Tag
+  Card, Table, message, Space, Popconfirm, Tag, Radio
 } from 'antd'
-import { PlusOutlined, DeleteOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useRequest } from 'ahooks'
 import { UploadImage, RichTextEditor } from '@/components'
@@ -40,7 +40,7 @@ export default function ProductFormPage() {
   }, [specAttributes])
 
   /**
-   * 核心改动：笛卡尔积算法，支持传入自定义的“对比参考源” (sourceList)
+   * 笛卡尔积算法，支持传入自定义的“对比参考源” (sourceList)
    */
   const generateSkus = (attributes: SpecAttribute[], sourceList: any[]) => {
     const validAttributes = attributes.filter(attr => attr.name && attr.values.length > 0)
@@ -64,11 +64,11 @@ export default function ProductFormPage() {
     const newSkuList = keepValues.map((combination: any[]) => {
       const skuKey = combination.map(c => `${c.specName}:${c.specValue}`).join('_')
 
-      // ✅ 优先从传入的 sourceList (可能是刚加载回来的接口数据) 里找匹配项
+      // 优先从传入的 sourceList 里找匹配项
       const existingSku = sourceList.find(s => s.skuKey === skuKey)
 
       const skuItem: any = {
-        id: existingSku?.id ?? undefined, // 保留后端返回的 sku id，编辑提交非常重要！
+        id: existingSku?.id ?? undefined, // 保留后端返回的 sku id
         skuKey,
         price: existingSku?.price ?? 0,
         stock: existingSku?.stock ?? 0,
@@ -95,15 +95,18 @@ export default function ProductFormPage() {
       refreshDeps: [id],
       onSuccess: (res) => {
         const data: any = res.data
-        form.setFieldsValue(data)
 
-        // ✅ 修复核心：先同步计算，再统一更新状态，防止渲染时数据被旧状态冲掉
+        // 数据回显：确保新增的业务字段能正确回显到表单
+        form.setFieldsValue({
+          action: 'confirm', // 设定安全默认底值
+          ...data
+        })
+
         const backendAttributes = data.specAttributes || []
         const backendSpecs = data.specs || []
 
         if (backendAttributes.length > 0) {
           setSpecAttributes(backendAttributes)
-          // 核心：强制传 backendSpecs 去进行首次的高精度组合匹配
           generateSkus(backendAttributes, backendSpecs)
         } else {
           setSkuList(backendSpecs)
@@ -115,7 +118,7 @@ export default function ProductFormPage() {
     }
   )
 
-  // 提交商品保持不变...
+  // 提交商品
   const { run: submitProduct, loading: submitLoading } = useRequest(
     async (values: any) => {
       const data: Product = {
@@ -206,7 +209,7 @@ export default function ProductFormPage() {
           <InputNumber
             min={0}
             step={0.01}
-            value={text} // 使用 value 绑定，使回显和修改生效
+            value={text}
             placeholder="0.00"
             onChange={(val) => {
               const updated = [...skuList]
@@ -225,7 +228,7 @@ export default function ProductFormPage() {
           <InputNumber
             min={0}
             precision={0}
-            value={text} // 使用 value 绑定
+            value={text}
             placeholder="0"
             onChange={(val) => {
               const updated = [...skuList]
@@ -241,7 +244,7 @@ export default function ProductFormPage() {
         key: 'skuCode',
         render: (text: string, record: any, index: number) => (
           <Input
-            value={text} // 使用 value 绑定
+            value={text}
             placeholder="条码/唯一编码"
             onChange={(e) => {
               const updated = [...skuList]
@@ -268,11 +271,11 @@ export default function ProductFormPage() {
             form={form}
             layout="vertical"
             onFinish={onSubmit}
-            initialValues={{ status: 'draft', sortOrder: 0 }}
+            initialValues={{ status: 'draft', sortOrder: 0, action: 'confirm' }}
             className="space-y-6"
             disabled={detailLoading}
           >
-            {/* 商品名称、富文本等基础表单... */}
+            {/* 基础表单信息 */}
             <Form.Item label="商品名称" name="name" rules={[{ required: true, message: '请输入商品名称' }]}>
               <Input placeholder="请输入商品名称" maxLength={50} showCount />
             </Form.Item>
@@ -288,6 +291,7 @@ export default function ProductFormPage() {
             <Form.Item label="商品详情" name="detail">
               <RichTextEditor placeholder="请输入商品详细介绍" height={450} />
             </Form.Item>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Form.Item label="商品状态" name="status">
                 <Select options={[
@@ -379,6 +383,25 @@ export default function ProductFormPage() {
                 />
               </Card>
             )}
+
+            {/* 🚀 新增：APP 下单流程控制 */}
+            <Card style={{ marginTop: "20px", marginBottom: "20px" }} title="移动端业务配置" className="border-gray-200 bg-linear-to-r from-gray-50 to-white">
+              <Form.Item
+                label="APP 用户下单交互流程"
+                name="action"
+                rules={[{ required: true, message: '请选择下单交互流程' }]}
+                extra="此配置将直接影响客户端行为。普通商品建议选择确认订单；定制、冲印类等需要物料的商品建议直接跳转上传照片。"
+              >
+                <Radio.Group optionType="button" buttonStyle="solid">
+                  <Radio.Button value="confirm">
+                    🛒 标准流（直接跳转至确认订单页）
+                  </Radio.Button>
+                  <Radio.Button value="upload">
+                    📸 定制流（优先跳转至上传照片页）
+                  </Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            </Card>
 
             {/* 底部按钮 */}
             <div className="flex justify-center gap-6 pt-6">
