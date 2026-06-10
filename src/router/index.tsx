@@ -11,6 +11,9 @@ import Commission from '@/app/commission/page'
 import WxUsers from '@/app/wx-user/page'
 import OrderDetail from '@/app/orders/[id]/page' // 导入详情页组件
 import QrcodeSettings from '@/app/settings/qrcode/page'
+// 导入优惠券页面
+import CouponList from '@/app/coupons/page'
+import CouponEdit from '@/app/coupons/[id]/page'
 
 const router = createBrowserRouter([
   {
@@ -29,6 +32,9 @@ const router = createBrowserRouter([
       { path: '/products/edit/:id', element: <ProductsEdit /> },
       { path: '/orders', element: <Orders /> },
       { path: '/settings/commission', element: <Commission /> },
+      { path: '/coupons', element: <CouponList /> },
+      { path: '/coupons/create', element: <CouponEdit /> },
+      { path: '/coupons/edit/:id', element: <CouponEdit /> },
       // React Router
       { path: '/settings/qrcode', element: <QrcodeSettings /> },
       // ✅ 添加动态路由
