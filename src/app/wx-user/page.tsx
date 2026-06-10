@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { Image, Tag, Switch, Space, message, Modal } from 'antd'
-import { ProTable, ProTableRef, SearchField } from '@/components'
+import { Tag, Switch, Space, message, Modal } from 'antd'
+import { Image, ProTable, ProTableRef, SearchField } from '@/components'
 import { getWxUserListApi, WxUser, updateWxUserStatusApi } from '@/api/user'
 
 export default function WxUsers() {
@@ -72,7 +72,6 @@ export default function WxUsers() {
           width={40}
           height={40}
           src={avatar}
-          fallback="https://picsum.photos/200/200"
           preview={false}
           className="rounded-full object-cover"
         />
