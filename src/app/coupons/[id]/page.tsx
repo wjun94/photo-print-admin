@@ -46,7 +46,7 @@ export default function CouponEdit() {
         name: keyword
       })
 
-      const products = res.data?.list || []
+      const products = (res.data as any)?.list || []
       const newOptions = products.map((product: any) => ({
         value: String(product.id),
         label: `${product.name} (ID: ${product.id})`
@@ -58,7 +58,7 @@ export default function CouponEdit() {
         setProductOptions(prev => [...prev, ...newOptions])
       }
 
-      setProductTotal(res.data?.total || 0)
+      setProductTotal((res.data as any)?.total || 0)
     } catch (err) {
       message.error('加载商品列表失败')
     } finally {
@@ -131,8 +131,8 @@ export default function CouponEdit() {
           // 补充不在当前列表中的商品（显示ID作为兜底）
           const existingIds = productOptions.map(opt => opt.value)
           const missingOptions = selectedIds
-            .filter(id => !existingIds.includes(id))
-            .map(id => ({ value: id, label: `商品ID: ${id}` }))
+            .filter((id: string) => !existingIds.includes(id))
+            .map((id: string) => ({ value: id, label: `商品ID: ${id}` }))
 
           if (missingOptions.length > 0) {
             setProductOptions(prev => [...prev, ...missingOptions])
