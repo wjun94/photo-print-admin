@@ -3,7 +3,7 @@ import {
   Form, Input, Select, Button, InputNumber,
   Card, Table, message, Space, Popconfirm, Tag, Radio
 } from 'antd'
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, CameraOutlined, ShoppingOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useRequest } from 'ahooks'
 import { UploadImage, RichTextEditor } from '@/components'
@@ -394,10 +394,10 @@ export default function ProductFormPage() {
               >
                 <Radio.Group optionType="button" buttonStyle="solid">
                   <Radio.Button value="confirm">
-                    🛒 标准流（直接跳转至确认订单页）
+                    <ShoppingOutlined /> 标准流（直接跳转至确认订单页）
                   </Radio.Button>
                   <Radio.Button value="upload">
-                    📸 定制流（优先跳转至上传照片页）
+                    <CameraOutlined /> 定制流（优先跳转至上传照片页）
                   </Radio.Button>
                 </Radio.Group>
               </Form.Item>
