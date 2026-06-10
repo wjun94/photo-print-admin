@@ -99,6 +99,7 @@ export default function ProductFormPage() {
         // 数据回显：确保新增的业务字段能正确回显到表单
         form.setFieldsValue({
           action: 'confirm', // 设定安全默认底值
+          tags: data.tags || [], // 🚀 新增：确保后端返回的 tags 数组能够正确回显
           ...data
         })
 
@@ -271,7 +272,7 @@ export default function ProductFormPage() {
             form={form}
             layout="vertical"
             onFinish={onSubmit}
-            initialValues={{ status: 'draft', sortOrder: 0, action: 'confirm' }}
+            initialValues={{ status: 'draft', sortOrder: 0, action: 'confirm', tags: [] }} // 🚀 新增：初始化 tag 默认值为空数组
             className="space-y-6"
             disabled={detailLoading}
           >
@@ -279,6 +280,21 @@ export default function ProductFormPage() {
             <Form.Item label="商品名称" name="name" rules={[{ required: true, message: '请输入商品名称' }]}>
               <Input placeholder="请输入商品名称" maxLength={50} showCount />
             </Form.Item>
+
+            {/* 🚀 新增：商品标签字段，支持输入多个 */}
+            <Form.Item
+              label="商品标签"
+              name="tags"
+              extra="请输入标签内容并按回车确认，支持配置多个标签。"
+            >
+              <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                placeholder="请输入商品标签（如：新品、热卖）并回车"
+                tokenSeparators={[',', '，']}
+              />
+            </Form.Item>
+
             <Form.Item label="商品封面" name="coverImage">
               <UploadImage type="single" maxCount={1} />
             </Form.Item>
@@ -384,7 +400,7 @@ export default function ProductFormPage() {
               </Card>
             )}
 
-            {/* 🚀 新增：APP 下单流程控制 */}
+            {/* APP 下单流程控制 */}
             <Card style={{ marginTop: "20px", marginBottom: "20px" }} title="移动端业务配置" className="border-gray-200 bg-linear-to-r from-gray-50 to-white">
               <Form.Item
                 label="APP 用户下单交互流程"
