@@ -72,7 +72,7 @@ export interface CouponListParams {
 
 // 获取优惠券列表
 export const getCouponListApi = (params: CouponListParams) => {
-  return request("/admin/coupons", {
+  return request("/admin/coupon", {
     method: "GET",
     params,
   });
@@ -80,14 +80,14 @@ export const getCouponListApi = (params: CouponListParams) => {
 
 // 获取优惠券详情
 export const getCouponDetailApi = (id: string) => {
-  return request(`/admin/coupons/${id}`, {
+  return request(`/admin/coupon/${id}`, {
     method: "GET",
   });
 };
 
 // 创建优惠券
 export const createCouponApi = (data: Partial<Coupon>) => {
-  return request("/admin/coupons", {
+  return request("/admin/coupon", {
     method: "POST",
     data,
   });
@@ -95,7 +95,7 @@ export const createCouponApi = (data: Partial<Coupon>) => {
 
 // 更新优惠券
 export const updateCouponApi = (id: string, data: Partial<Coupon>) => {
-  return request(`/admin/coupons/${id}`, {
+  return request(`/admin/coupon/${id}`, {
     method: "PUT",
     data,
   });
@@ -103,7 +103,7 @@ export const updateCouponApi = (id: string, data: Partial<Coupon>) => {
 
 // 删除优惠券
 export const deleteCouponApi = (id: string) => {
-  return request(`/admin/coupons/${id}`, {
+  return request(`/admin/coupon/${id}`, {
     method: "DELETE",
   });
 };
