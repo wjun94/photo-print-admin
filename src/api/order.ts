@@ -85,22 +85,22 @@ export interface OrderListParams extends PageParams {
 
 // 获取订单列表接口（完全匹配你的后端接口）
 export function getOrderListApi(params: OrderListParams) {
-  return request.get<ApiResponse<PageList<Order[]>>>("/admin/order", {
+  return request.get<ApiResponse<PageList<Order[]>>>("/admin/orders", {
     params,
   });
 }
 
 // 获取订单列表接口（完全匹配你的后端接口）
 export function getOrderDetail(id: string) {
-  return request.get<Order>(`/admin/order/${id}`);
+  return request.get<Order>(`/admin/orders/${id}`);
 }
 
 // 去发货
 export function orderShip(data: any) {
-  return request.post("/admin/order/ship", data);
+  return request.post("/admin/orders/ship", data);
 }
 
 // 完成订单
 export function orderComplete(data: any) {
-  return request.post("/admin/order/complete", data);
+  return request.post("/admin/orders/complete", data);
 }
