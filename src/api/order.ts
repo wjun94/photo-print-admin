@@ -45,6 +45,7 @@ export interface Order {
   updatedAt: string;
   remark: string;
   amount: number;
+  discountAmount: number
   freight: number;
   actualAmount: number;
 
