@@ -335,7 +335,7 @@ export default function OrderDetail() {
               {/* 优惠金额 */}
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">优惠金额</span>
-                <span className="font-medium tabular-nums text-gray-800">¥{order.discountAmount.toFixed(2)}</span>
+                <span className="font-medium tabular-nums text-gray-800">- ¥{order.discountAmount.toFixed(2)}</span>
               </div>
 
               {/* 运费 */}
