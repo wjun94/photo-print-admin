@@ -202,6 +202,35 @@ export default function OrderDetail() {
             </div>
           </Card>
 
+          {/* 物流信息 */}
+          {order.logistics && order.logistics.length > 0 && (
+            <Card title={<span className="text-base font-semibold">物流信息</span>} className="shadow-sm">
+              <Space vertical size="middle" className="w-full">
+                {order.logistics.map((logistic: Logistics) => (
+                  <div key={logistic.id} className="p-4 bg-gray-50/80 rounded-xl border border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
+                      <div className="font-semibold text-gray-800">
+                        {logistic.courierName}{' '}
+                        <span className="text-xs text-gray-400 font-normal">({logistic.courierCode})</span>
+                      </div>
+                      <Text copyable={{ text: logistic.trackingNo }} className="text-blue-600 font-medium">
+                        {logistic.trackingNo}
+                      </Text>
+                    </div>
+                    {logistic.remark && (
+                      <div className="text-xs text-gray-500 mt-1.5 bg-white p-2 rounded border border-gray-100">
+                        <span className="font-medium text-gray-400">发货备注：</span>{logistic.remark}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-400 mt-2">
+                      发货时间：{logistic.createdAt}
+                    </div>
+                  </div>
+                ))}
+              </Space>
+            </Card>
+          )}
+
           {/* 收货地址 */}
           <Card title={<span className="text-base font-semibold">收货地址</span>} className="shadow-sm">
             <div className="text-sm">
@@ -216,7 +245,7 @@ export default function OrderDetail() {
           </Card>
 
           {/* 用户上传照片（核心功能） */}
-          <Card
+          {order.items?.length ? <Card
             title={
               <span className="text-base font-semibold text-gray-900 flex items-center gap-1.5">
                 <CameraOutlined className="text-blue-500" />
@@ -260,7 +289,7 @@ export default function OrderDetail() {
                 </div>
               </div>
             )}
-          </Card>
+          </Card> : null}
 
           {/* 商品规格汇总 */}
           <Card title={<span className="text-base font-semibold">商品规格汇总</span>} className="shadow-sm">
@@ -303,6 +332,12 @@ export default function OrderDetail() {
                 <span className="font-medium tabular-nums text-gray-800">¥{order.amount.toFixed(2)}</span>
               </div>
 
+              {/* 优惠金额 */}
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">优惠金额</span>
+                <span className="font-medium tabular-nums text-gray-800">- ¥{order.discountAmount.toFixed(2)}</span>
+              </div>
+
               {/* 运费 */}
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">运费</span>
@@ -320,35 +355,6 @@ export default function OrderDetail() {
               </div>
             </div>
           </Card>
-
-          {/* 物流信息 */}
-          {order.logistics && order.logistics.length > 0 && (
-            <Card title={<span className="text-base font-semibold">物流信息</span>} className="shadow-sm">
-              <Space vertical size="middle" className="w-full">
-                {order.logistics.map((logistic: Logistics) => (
-                  <div key={logistic.id} className="p-4 bg-gray-50/80 rounded-xl border border-gray-100">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
-                      <div className="font-semibold text-gray-800">
-                        {logistic.courierName}{' '}
-                        <span className="text-xs text-gray-400 font-normal">({logistic.courierCode})</span>
-                      </div>
-                      <Text copyable={{ text: logistic.trackingNo }} className="text-blue-600 font-medium">
-                        {logistic.trackingNo}
-                      </Text>
-                    </div>
-                    {logistic.remark && (
-                      <div className="text-xs text-gray-500 mt-1.5 bg-white p-2 rounded border border-gray-100">
-                        <span className="font-medium text-gray-400">发货备注：</span>{logistic.remark}
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-400 mt-2">
-                      发货时间：{logistic.createdAt}
-                    </div>
-                  </div>
-                ))}
-              </Space>
-            </Card>
-          )}
 
           {/* 底部操作按钮 */}
           <div className="flex justify-center pt-4 pb-8">

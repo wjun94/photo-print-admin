@@ -45,6 +45,7 @@ export interface Order {
   updatedAt: string;
   remark: string;
   amount: number;
+  discountAmount: number
   freight: number;
   actualAmount: number;
 
@@ -97,10 +98,10 @@ export function getOrderDetail(id: string) {
 
 // 去发货
 export function orderShip(data: any) {
-  return request.post("/admin/order/ship", data);
+  return request.post("/admin/orders/ship", data);
 }
 
 // 完成订单
 export function orderComplete(data: any) {
-  return request.post("/admin/order/complete", data);
+  return request.post("/admin/orders/complete", data);
 }

@@ -11,6 +11,7 @@ import {
   MoneyCollectOutlined,
   SettingOutlined,
   QrcodeOutlined,
+  GiftOutlined,
 } from '@ant-design/icons'
 
 const { Header, Sider, Content } = Layout
@@ -27,6 +28,7 @@ export default function AppLayout() {
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: '首页' },
     { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
+    { key: '/coupons', icon: <GiftOutlined />, label: '优惠券管理' },
     { key: '/orders', icon: <OrderedListOutlined />, label: '订单管理' },
     { key: '/wx-users', icon: <UserOutlined />, label: '用户管理' },
     {
